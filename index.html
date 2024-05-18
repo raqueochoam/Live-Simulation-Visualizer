@@ -3,19 +3,59 @@
 <head>
     <meta charset="utf-8">
     <meta name="description" content="">
-    <title>Template</title>
+    <title>Manufacturing Simulation</title>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="css/bootstrap.min.css">
     <!-- Custom styling -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Estilos personalizados para las gráficas -->
+    <style>
+        .chart-container {
+            margin-bottom: 20px;
+        }
+        .chart-title {
+            margin-bottom: 10px;
+        }
+        .chart {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>d3 is great!</h1>
-    <!-- Bootstrap grid setup -->
     <div class="container">
-        <div class="row">
-            <div id="chart-area"></div>
+        <div class="row chart-container">
+            <div class="col-md-12">
+                <h2 class="chart-title">Results Simulation per day</h2>
+                <div id="chart-area" class="chart"></div>
+            </div>
+        </div>
+        <div class="row chart-container">
+            <div class="col-md-6">
+                <h2 class="chart-title">Acceptance %</h2>
+                <div id="pieGraph-area" class="chart"></div>
+            </div>
+            <div class="col-md-6">
+                <h2 class="chart-title">Occupancy per workstation</h2>
+                <div id="graph-occupancy-area" class="chart"></div>
+            </div>
+        </div>
+        <div class="row chart-container">
+            <div class="col-md-6">
+                <h2 class="chart-title">Downtime per workstation</h2>
+                <div id="graph-downtime-area" class="chart"></div>
+            </div>
+            <div class="col-md-6">
+                <h2 class="chart-title">Idle per workstation</h2>
+                <div id="graph-idle-time-area" class="chart"></div>
+            </div>
+        </div>
+        <div class="row chart-container">
+            <div class="col-md-12">
+                <h2 class="chart-title">Waiting time per workstation</h2>
+                <div id="graph-waiting-time-area" class="chart"></div>
+            </div>
         </div>
     </div>
 
