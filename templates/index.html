@@ -25,6 +25,11 @@
 
 <body>
     <div class="container">
+
+         <!-- Botón para ejecutar la simulación -->
+         <button id="run-simulation" class="btn btn-primary">Run Simulation</button>
+         <div id="simulation-output" style="margin-top: 20px;"></div>
+
         <div class="row chart-container">
             <div class="col-md-12">
                 <h2 class="chart-title">Results Simulation per day</h2>
@@ -63,6 +68,28 @@
 <script src="{{ url_for('static', filename='js/d3.min.js') }}"></script>
 <!-- Custom JS -->
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+<script>
+    document.getElementById('run-simulation').addEventListener('click', function() {
+        fetch('/run-simulation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('simulation-output').innerText = data.output;
+                console.log('Simulation output:', data.output);
+            } else {
+                document.getElementById('simulation-output').innerText = 'Error: ' + data.error;
+                console.error('Simulation error:', data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
 
 </body>
 </html>
