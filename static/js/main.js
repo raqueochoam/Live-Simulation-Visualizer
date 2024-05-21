@@ -108,11 +108,11 @@ function updateData() {
                 var xScale = d3.scaleBand()
                     .domain(d3.range(data.length))
                     .range([0, 325])
-                    .padding(0.9);
+                    .padding(0.2);
 
                 var yScale = d3.scaleLinear()
                     .domain([0, d3.max(data)])
-                    .range([100, 0]);
+                    .range([300, 0]);
 
                 var xAxis = d3.axisBottom(xScale)
                     .tickFormat((d, i) => "W" + (i + 1));
@@ -123,11 +123,26 @@ function updateData() {
                     .attr("x", (d, i) => xScale(i))
                     .attr("y", (d) => yScale(d))
                     .attr("width", xScale.bandwidth())
-                    .attr("height", (d) => 100 - yScale(d))
-                    .attr("fill", colorScale(type));
+                    .attr("height", (d) => 300 - yScale(d))
+                    .attr("fill", colorScale(type))
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 1)
+                    .on("mouseover", function(event, d) {
+                        d3.select(this).attr("fill", "orange");
+                        svg.append("text")
+                            .attr("x", parseFloat(d3.select(this).attr("x")) + xScale.bandwidth() / 2)
+                            .attr("y", yScale(d) - 10)
+                            .attr("text-anchor", "middle")
+                            .attr("class", "label")
+                            .text(d.toFixed(2));
+                    })
+                    .on("mouseout", function(d, i) {
+                        d3.select(this).attr("fill", colorScale(type));
+                        svg.selectAll(".label").remove();
+                    });
 
                 svg.append("g")
-                    .attr("transform", "translate(0, 100)")
+                    .attr("transform", "translate(0, 300)")
                     .call(xAxis);
 
                 svg.append("g")
@@ -150,36 +165,75 @@ function createBottleneckAnimation(data) {
     animationArea.select("svg").remove();
 
     var width = 600;
-    var height = 200;
+    var height = 300; // Incrementar la altura para la leyenda
     var svg = animationArea.append("svg")
         .attr("width", width)
         .attr("height", height);
 
     var circleRadius = 10;
 
+    // Crear un grupo para los círculos
+    var circlesGroup = svg.append("g");
+
     // Crear círculos para representar los elementos que se mueven
-    var circles = svg.selectAll("circle")
+    var circles = circlesGroup.selectAll("circle")
         .data(data)
         .enter().append("circle")
         .attr("cx", 0)
         .attr("cy", (d, i) => (i + 1) * (circleRadius * 2 + 10))
         .attr("r", circleRadius)
-        .attr("fill", "steelblue");
+        .attr("fill", (d) => d.status === 'delayed' ? 'red' : 'steelblue')
+        .attr("stroke", "black")
+        .attr("stroke-width", 1);
 
     // Crear la animación
-    circles.transition()
-        .duration(2000)
-        .attr("cx", width)
-        .on("end", function() {
-            d3.select(this)
-                .attr("cx", 0)
-                .transition()
-                .duration(2000)
-                .attr("cx", width)
-                .on("end", function() {
-                    d3.select(this).attr("cx", 0);
-                });
-        });
+    function animateCircles() {
+        circles.transition()
+            .duration(2000)
+            .attr("cx", width)
+            .attr("fill", (d) => d.status === 'delayed' ? 'orange' : 'green')
+            .on("end", function() {
+                d3.select(this)
+                    .attr("cx", 0)
+                    .attr("fill", (d) => d.status === 'delayed' ? 'red' : 'steelblue')
+                    .transition()
+                    .duration(2000)
+                    .attr("cx", width)
+                    .attr("fill", (d) => d.status === 'delayed' ? 'orange' : 'green')
+                    .on("end", animateCircles);
+            });
+    }
+
+    animateCircles();
+
+    // Agregar la leyenda
+    var legendData = [
+        { label: "Elementos retrasados", color: "red" },
+        { label: "Elementos en progreso sin retraso", color: "steelblue" },
+        { label: "Elementos retrasados durante la transición", color: "orange" },
+        { label: "Elementos en progreso durante la transición", color: "green" }
+    ];
+
+    var legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(10, 210)"); // Posición de la leyenda
+
+    legend.selectAll("rect")
+        .data(legendData)
+        .enter().append("rect")
+        .attr("x", 0)
+        .attr("y", (d, i) => i * 20)
+        .attr("width", 18)
+        .attr("height", 18)
+        .style("fill", d => d.color);
+
+    legend.selectAll("text")
+        .data(legendData)
+        .enter().append("text")
+        .attr("x", 24)
+        .attr("y", (d, i) => i * 20 + 9)
+        .attr("dy", ".35em")
+        .text(d => d.label);
 }
 
 document.addEventListener("DOMContentLoaded", function() {
