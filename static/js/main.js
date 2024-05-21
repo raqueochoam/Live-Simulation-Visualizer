@@ -1,3 +1,5 @@
+console.log("main.js cargado");
+
 document.addEventListener("DOMContentLoaded", function() {
     // Obtener el elemento donde se mostrarán los textos centrados y los gráficos
     var chartArea = d3.select("#chart-area");
@@ -8,17 +10,16 @@ document.addEventListener("DOMContentLoaded", function() {
     var pieGraphArea = d3.select("#pieGraph-area");
 
     // Función para crear y agregar un texto centrado al área del gráfico
-    function addCenteredText(text) {
-        var textElement = document.createElement("div");
-        textElement.textContent = text;
-        textElement.style.textAlign = "center";
-        textElement.style.fontSize = "24px";
-        textElement.style.marginTop = "20px";
-        chartArea.node().appendChild(textElement);
+    function addCenteredText(area, text) {
+        var textElement = area.append("div")
+            .style("text-align", "center")
+            .style("font-size", "24px")
+            .style("margin-top", "20px")
+            .text(text);
     }
 
     // Cargar los datos desde el archivo JSON
-    d3.json("daily_statistics.json").then(function(jsonData) {
+    d3.json("/daily_statistics.json").then(function(jsonData) {
         // Calcular el porcentaje de aceptación
         var acceptancePercentage = 100.0 - jsonData[0].rejection_percentage;
 
@@ -29,14 +30,14 @@ document.addEventListener("DOMContentLoaded", function() {
         ];
 
         // Mostrar los datos
-        addCenteredText("Production: " + jsonData[0].production);
-        addCenteredText("Rejections: " + jsonData[0].rejections);
-        addCenteredText("Rejection Percentage: " + jsonData[0].rejection_percentage + "%");
-        addCenteredText("Delay Due to Bottleneck: " + jsonData[0].delay_due_to_bottleneck);
-        addCenteredText("Accidents: " + jsonData[0].accidents);
+        addCenteredText(chartArea, "Production: " + jsonData[0].production);
+        addCenteredText(chartArea, "Rejections: " + jsonData[0].rejections);
+        addCenteredText(chartArea, "Rejection Percentage: " + jsonData[0].rejection_percentage + "%");
+        addCenteredText(chartArea, "Delay Due to Bottleneck: " + jsonData[0].delay_due_to_bottleneck);
+        addCenteredText(chartArea, "Accidents: " + jsonData[0].accidents);
 
         // Definir escalas y ejes comunes para pie
-        var color = d3.scaleOrdinal()
+        var colorScale = d3.scaleOrdinal()
             .domain(["Acceptance", "Rejection"])
             .range(["lightgreen", "red"]);
 
@@ -45,7 +46,8 @@ document.addEventListener("DOMContentLoaded", function() {
         var pieHeight = 400;
         var radius = Math.min(pieWidth, pieHeight) / 2;
 
-        var svg = pieGraphArea.append("div").append("svg")
+        var svg = pieGraphArea.append("div")
+            .append("svg")
             .attr("width", pieWidth)
             .attr("height", pieHeight)
             .append("g")
@@ -70,59 +72,49 @@ document.addEventListener("DOMContentLoaded", function() {
 
         arc.append("path")
             .attr("d", path)
-            .attr("fill", function(d) { return color(d.data.label); });
+            .attr("fill", function(d) { return colorScale(d.data.label); });
 
         arc.append("text")
             .attr("transform", function(d) { return "translate(" + label.centroid(d) + ")"; })
             .attr("dy", "0.35em")
             .text(function(d) { return d.data.label + ": " + d.data.value.toFixed(2) + "%"; });
 
-        // Definir escalas y ejes comunes
-        var xScale = d3.scaleBand()
-            .domain(d3.range(6))
-            .range([0, 325])
-            .padding(0.9);
-
-        var yScale = d3.scaleLinear()
-            .range([100, 0]);
-
-        var xAxis = d3.axisBottom(xScale)
-            .tickFormat((d, i) => "W" + (i + 1));
-
-        var color = d3.scaleOrdinal()
-            .domain(["occupancy", "downtime", "idleTime", "waitingTime"])
-            .range(["lightblue", "pink", "lightgreen", "yellow"]);
-
-        // Crear gráficos y ejes para cada tipo de tiempo
-        ["occupancy", "downtime", "idleTime", "waitingTime"].forEach(function(type) { // iterar para cada grafico
+        // Crear gráficos de barras para cada tipo de tiempo
+        ["occupancy", "downtime", "idleTime", "waitingTime"].forEach(function(type) {
             var data = jsonData[0][type + "_per_workstation"];
 
-            console.log("Tipo de gráfico:", type);
-            console.log("Datos:", data);
-
             if (data) {
-                var yMax = d3.max(data);
-                yScale.domain([0, yMax]);
-
                 var graphArea;
                 if(type === "occupancy") graphArea = occupancyGraphArea;
                 if(type === "downtime") graphArea = downtimeGraphArea;
                 if(type === "idleTime") graphArea = idleGraphArea;
                 if(type === "waitingTime") graphArea = waitingGraphArea;
 
-                var svg = graphArea.append("div").append("svg")
+                var svg = graphArea.append("div")
+                    .append("svg")
                     .attr("width", 400)
                     .attr("height", 400);
 
+                var xScale = d3.scaleBand()
+                    .domain(d3.range(data.length))
+                    .range([0, 325])
+                    .padding(0.9);
+
+                var yScale = d3.scaleLinear()
+                    .domain([0, d3.max(data)])
+                    .range([100, 0]);
+
+                var xAxis = d3.axisBottom(xScale)
+                    .tickFormat((d, i) => "W" + (i + 1));
+
                 svg.selectAll("rect")
                     .data(data)
-                    .enter()
-                    .append("rect")
-                    .attr("x", (d, i) => i * 50 + 25)
+                    .enter().append("rect")
+                    .attr("x", (d, i) => xScale(i))
                     .attr("y", (d) => yScale(d))
-                    .attr("width", 20)
+                    .attr("width", xScale.bandwidth())
                     .attr("height", (d) => 100 - yScale(d))
-                    .attr("fill", color(type));
+                    .attr("fill", colorScale(type));
 
                 svg.append("g")
                     .attr("transform", "translate(0, 100)")
@@ -134,7 +126,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 console.error(`No se encontraron datos para ${type}_per_workstation`);
             }
         });
+
     }).catch(function(error) {
         console.error('Error al cargar el archivo JSON:', error);
     });
+
 });
