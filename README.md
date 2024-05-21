@@ -17,6 +17,6 @@
 Notes:
 There is a small bug with the “Run simulation” button, sometimes it doesn't overwrite the json file, we didn't manage to fix it and it seems that for a moment the graphics are deleted, but just by clicking the button again it works again.
 
-### Link of Development Log ans Personal Reflections document
+### Link of Development Log and Personal Reflections document
 https://docs.google.com/document/d/1L_zMI6gVM432hkqHuQG2KWr54Zz6szFGz0uQ1he1VdM/edit?usp=sharing
 
