@@ -1,28 +1,28 @@
 [
     {
         "production": 16,
-        "rejections": 1,
-        "rejection_percentage": 6.25,
-        "fix_time": 9.25,
-        "delay_due_to_bottleneck": 457.83000000000004,
+        "rejections": 0,
+        "rejection_percentage": 0.0,
+        "fix_time": 52.39999999999999,
+        "delay_due_to_bottleneck": 484.29999999999995,
         "accidents": 0,
         "occupancy_per_workstation": [
-            18,
-            18,
             17,
-            17,
-            17,
-            17
+            16,
+            16,
+            16,
+            16,
+            16
         ],
         "downtime_per_workstation": [
-            4.92,
-            0.15,
+            15.489999999999998,
+            3.7,
             0,
             0,
-            0,
-            2.21
+            20.83,
+            2.33
         ],
-        "idle_time_per_workstation": [
+        "idleTime_per_workstation": [
             0,
             0,
             0,
@@ -30,13 +30,13 @@
             0,
             0
         ],
-        "waiting_time_per_workstation": [
-            159.18391681271828,
-            226.98489978043568,
-            274.4490821008596,
-            345.1681508281361,
-            408.3730786914576,
-            483.2415955642588
+        "waitingTime_per_workstation": [
+            163.73131499872258,
+            213.72082863593894,
+            275.32717100796214,
+            342.8445280447362,
+            416.5469803813494,
+            484.29763825818907
         ]
     }
 ]

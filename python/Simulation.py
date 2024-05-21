@@ -144,8 +144,8 @@ def run_simulation():
             "accidents": facility.total_accidents,
             "occupancy_per_workstation": facility.workstation_occupancy,
             "downtime_per_workstation": facility.workstation_downtime,
-            "idle_time_per_workstation": facility.workstation_idle_time,
-            "waiting_time_per_workstation": facility.workstation_waiting_time
+            "idleTime_per_workstation": facility.workstation_idle_time,
+            "waitingTime_per_workstation": facility.workstation_waiting_time
         }
 
         daily_data.append(daily_statistics)
