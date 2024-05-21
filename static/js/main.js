@@ -5,6 +5,7 @@ var downtimeGraphArea = d3.select("#graph-downtime-area");
 var idleGraphArea = d3.select("#graph-idle-time-area");
 var waitingGraphArea = d3.select("#graph-waiting-time-area");
 var pieGraphArea = d3.select("#pieGraph-area");
+var animationArea = d3.select("#animation-area");
 
 // Función para crear y agregar un texto centrado al área del gráfico
 function addCenteredText(area, text) {
@@ -25,6 +26,7 @@ function updateData() {
     downtimeGraphArea.select("div").remove();
     idleGraphArea.select("div").remove();
     waitingGraphArea.select("div").remove();
+    animationArea.select("div").remove();
     
     // Cargar los datos desde el archivo JSON
     d3.json("/daily_statistics.json").then(function(jsonData) {
@@ -135,9 +137,49 @@ function updateData() {
             }
         });
 
+        // Crear la animación del cuello de botella
+        createBottleneckAnimation(jsonData[0].bottleneck_data);
+
     }).catch(function(error) {
         console.error('Error al cargar el archivo JSON:', error);
     });
+}
+
+function createBottleneckAnimation(data) {
+    // Limpiar la animación anterior
+    animationArea.select("svg").remove();
+
+    var width = 600;
+    var height = 200;
+    var svg = animationArea.append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    var circleRadius = 10;
+
+    // Crear círculos para representar los elementos que se mueven
+    var circles = svg.selectAll("circle")
+        .data(data)
+        .enter().append("circle")
+        .attr("cx", 0)
+        .attr("cy", (d, i) => (i + 1) * (circleRadius * 2 + 10))
+        .attr("r", circleRadius)
+        .attr("fill", "steelblue");
+
+    // Crear la animación
+    circles.transition()
+        .duration(2000)
+        .attr("cx", width)
+        .on("end", function() {
+            d3.select(this)
+                .attr("cx", 0)
+                .transition()
+                .duration(2000)
+                .attr("cx", width)
+                .on("end", function() {
+                    d3.select(this).attr("cx", 0);
+                });
+        });
 }
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -166,4 +208,3 @@ document.addEventListener("DOMContentLoaded", function() {
     // Llama a la función updateGraphs cuando la página se cargue por primera vez para mostrar las gráficas iniciales.
     updateData();
 });
-
