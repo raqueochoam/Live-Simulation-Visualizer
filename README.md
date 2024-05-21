@@ -4,6 +4,7 @@
 - Raquel Magdalena Ochoa Martínez
 - Pablo Armando Uscanga Camacho
 - Jorge Vargas González
+- Oscar Durán Gómez
 
 ## To use the project, follow these steps:
 1. Run the `Simulation.py` file.
