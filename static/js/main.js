@@ -1,23 +1,31 @@
 console.log("main.js cargado");
+var chartArea = d3.select("#chart-area");
+var occupancyGraphArea = d3.select("#graph-occupancy-area");
+var downtimeGraphArea = d3.select("#graph-downtime-area");
+var idleGraphArea = d3.select("#graph-idle-time-area");
+var waitingGraphArea = d3.select("#graph-waiting-time-area");
+var pieGraphArea = d3.select("#pieGraph-area");
 
-document.addEventListener("DOMContentLoaded", function() {
-    // Obtener el elemento donde se mostrarán los textos centrados y los gráficos
-    var chartArea = d3.select("#chart-area");
-    var occupancyGraphArea = d3.select("#graph-occupancy-area");
-    var downtimeGraphArea = d3.select("#graph-downtime-area");
-    var idleGraphArea = d3.select("#graph-idle-time-area");
-    var waitingGraphArea = d3.select("#graph-waiting-time-area");
-    var pieGraphArea = d3.select("#pieGraph-area");
+// Función para crear y agregar un texto centrado al área del gráfico
+function addCenteredText(area, text) {
+    var textElement = area.append("div")
+        .style("text-align", "center")
+        .style("font-size", "24px")
+        .style("margin-top", "20px")
+        .text(text);
+}
 
-    // Función para crear y agregar un texto centrado al área del gráfico
-    function addCenteredText(area, text) {
-        var textElement = area.append("div")
-            .style("text-align", "center")
-            .style("font-size", "24px")
-            .style("margin-top", "20px")
-            .text(text);
-    }
+function updateData() {
+    // Limpiar textos anteriores
+    chartArea.selectAll("div").remove();
 
+    // Limpiar gráficos anteriores
+    pieGraphArea.select("div").remove();
+    occupancyGraphArea.select("div").remove();
+    downtimeGraphArea.select("div").remove();
+    idleGraphArea.select("div").remove();
+    waitingGraphArea.select("div").remove();
+    
     // Cargar los datos desde el archivo JSON
     d3.json("/daily_statistics.json").then(function(jsonData) {
         // Calcular el porcentaje de aceptación
@@ -130,5 +138,32 @@ document.addEventListener("DOMContentLoaded", function() {
     }).catch(function(error) {
         console.error('Error al cargar el archivo JSON:', error);
     });
+}
 
+document.addEventListener("DOMContentLoaded", function() {
+    
+    document.getElementById('run-simulation').addEventListener('click', function() {
+        fetch('/run-simulation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('simulation-output').innerText = data.output;
+                console.log('Simulation output:', data.output);
+                updateData();
+            } else {
+                document.getElementById('simulation-output').innerText = 'Error: ' + data.error;
+                console.error('Simulation error:', data.error);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+    // Llama a la función updateGraphs cuando la página se cargue por primera vez para mostrar las gráficas iniciales.
+    updateData();
 });
+
