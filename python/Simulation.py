@@ -13,7 +13,7 @@ PROB_ACCIDENT = 0.0001
 AVERAGE_FIX_TIME = 3
 AVERAGE_WORK_TIME = 4
 
-SIM_TIME = 500
+SIM_TIME = 1000  # Aumentamos el tiempo de simulación para tener más elementos en la animación
 NUM_DAYS = 1
 
 class ManufacturingFacility:
@@ -44,7 +44,7 @@ class ManufacturingFacility:
                     self.total_accidents += 1
                     yield self.env.timeout(100)
 
-                for i in [0, 1, 2, 3, 4, 5]:
+                for i in range(NUM_WORKSTATIONS):
                     workstation = self.workstations[i]
                     with workstation.request() as req:
                         yield req
@@ -66,6 +66,12 @@ class ManufacturingFacility:
                             self.workstation_waiting_time[i] += self.env.now - start_time
                         else:
                             self.workstation_idle_time[i] += self.env.now - start_time
+
+                        # Introducir retrasos ocasionales
+                        if np.random.random() < 0.1:  # 10% de probabilidad de retraso adicional
+                            extra_delay = round(np.random.normal(2, 0.5), 2)
+                            yield self.env.timeout(extra_delay)
+                            self.workstation_downtime[i] += extra_delay
 
                 if np.random.random() < PROB_REJECTION:
                     self.total_rejections += 1
